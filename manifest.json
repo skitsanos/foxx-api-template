@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/foxx-manifest",
+  "name": "foxx-services",
+  "version": "1.0.1",
+  "author": "Skitsanos",
+  "main": "index.js",
+  "scripts": {
+    "setup": "setup.js"
+  },
+  "engines": {
+    "arangodb": "^3.0.0"
+  },
+  "configuration": {
+    "showExecTime": {
+      "default": false,
+      "type": "boolean"
+    },
+    "skipAuthorization": {
+      "default": false,
+      "type": "boolean"
+    }
+  }
+}
