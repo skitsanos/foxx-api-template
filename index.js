@@ -4,6 +4,7 @@
  */
 const {query} = require('@arangodb');
 
+module.context.use('/', require('./foxx-services/tokenz/index'));
 module.context.use('/', require('./foxx-services/echo/index'));
 module.context.use('/', require('./foxx-services/users/index'));
 
@@ -27,9 +28,10 @@ module.context.checkAuth = headers =>
 
     const [, token] = auth_header.split(' ');
 
-    const user = query`
+    const user = query`        
     FOR user in auth
-    FILTER user.token==${token}
+        FILTER user.token==${token}
+        UPDATE user WITH { lastLogin: DATE_NOW() } IN auth
     RETURN user
     `.toArray();
 
