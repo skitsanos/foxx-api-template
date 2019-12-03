@@ -4,7 +4,6 @@
  */
 const {query} = require('@arangodb');
 
-module.context.use('/', require('./foxx-services/tokenz/index'));
 module.context.use('/', require('./foxx-services/echo/index'));
 module.context.use('/', require('./foxx-services/users/index'));
 
