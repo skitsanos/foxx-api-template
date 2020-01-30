@@ -1,7 +1,8 @@
 {
-  "name": "imanageit",
+  "name": "foxx-service",
   "version": "1.0.0",
-  "dependencies": {
-    "lodash": "^4.17.15"
+  "dependencies": {},
+  "scripts": {
+    "bundle": "zip -r service.zip --exclude=*.git* --exclude=*.gitignore* --exclude=*.DS_Store* --exclude=*.idea* --exclude=*node_modules* ."
   }
 }
