@@ -1,7 +1,6 @@
 const createRouter = require('@arangodb/foxx/router');
 const {db, query, time} = require('@arangodb');
 const joi = require('joi');
-const _ = require('lodash');
 const r = createRouter();
 module.exports = r;
 
@@ -17,20 +16,30 @@ r.get('/users', (req, res) =>
 {
     const start = time();
 
-    if (!collectionUsers)
-    {
-        //create new one?
-        res.throw('Not found');
-    }
-    else
-    {
-        const users = query`
-        FOR user in users
-        RETURN user
-        `.toArray().map(item => _.omit(item, ['password', '_id', '_rev']));
+    const skip = req.queryParams.skip
+                 ? Number(req.queryParams.skip)
+                 : 0;
+    const dataset = query`
+        LET skip=${skip}
+        LET pageSize=${req.queryParams.pageSize
+                       ? Number(req.queryParams.pageSize)
+                       : 25}
+        let ds = (FOR doc in users
+            LIMIT skip,pageSize
+            RETURN UNSET(doc, "_id","_rev")
+        )
+        RETURN {
+            result: ds, 
+            skip: skip,
+            pageSize: pageSize,
+            total: LENGTH(users)
+            }
+        `.toArray();
 
-        res.send({result: users, execTime: time() - start});
-    }
+    res.send({
+        ...dataset[0],
+        execTime: time() - start
+    });
 })
     .response(['application/json'], 'User management - List users')
     .description('Gets list of users');
@@ -39,13 +48,15 @@ r.get('/users/:id', (req, res) =>
 {
     const start = time();
 
-    const user = query`
-    FOR user in users
-    FILTER user._key==${req.pathParams.id}
-    RETURN user
+    const dataset = query`
+    RETURN UNSET(DOCUMENT(users, ${req.pathParams.id}),"_id","_rev", "password")
     `.toArray();
 
-    res.send({result: user.length > 0 ? _.omit(user[0], ['password', '_id', '_rev']) : null, execTime: time() - start});
+    res.send({
+        result: dataset.length > 0
+                ? dataset[0]
+                : null, execTime: time() - start
+    });
 })
     .pathParam('id', joi.string().required(), 'User id')
     .response(['application/json'], 'User management - List users')
